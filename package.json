@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "Korean Saju Fortune Telling App — English for international users",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   }
 }
