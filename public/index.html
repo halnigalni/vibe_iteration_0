@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사주 · Saju — Korean Destiny Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1008;
+    --ink-light: #3d2b1a;
+    --paper: #f5efe3;
+    --paper-dark: #e8dcc8;
+    --paper-aged: #d4c4a8;
+    --red: #8b1a1a;
+    --red-light: #c0392b;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --muted: #7a6a55;
+    --stroke: rgba(26,16,8,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IM Fell English', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Paper texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* Brush stroke decorations */
+  .brush-top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, transparent, var(--red) 20%, var(--red) 80%, transparent);
+    opacity: 0.7;
+  }
+
+  .brush-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--ink-light) 30%, var(--ink-light) 70%, transparent);
+    opacity: 0.4;
+  }
+
+  /* Vertical ink lines (decorative) */
+  .ink-line-left, .ink-line-right {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 1px;
+    opacity: 0.12;
+    background: var(--ink);
+    pointer-events: none;
+  }
+  .ink-line-left { left: 60px; }
+  .ink-line-right { right: 60px; }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    position: relative;
+  }
+
+  .hanzi-deco {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-bottom: 6px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .logo-korean {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 300;
+    color: var(--red);
+    letter-spacing: 0.3em;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .tagline {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 15px;
+    margin-top: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Decorative horizontal rule */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 500px;
+    margin: 28px auto;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--ink-light));
+    opacity: 0.3;
+  }
+  .divider::after {
+    background: linear-gradient(90deg, var(--ink-light), transparent);
+  }
+  .divider-symbol {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--red);
+    font-size: 20px;
+    opacity: 0.7;
+  }
+
+  /* NAVIGATION TABS */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 20px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: none;
+    border: 1px solid var(--stroke);
+    border-bottom: none;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  .tab-btn:hover {
+    color: var(--ink);
+    background: var(--paper-dark);
+  }
+
+  .tab-btn.active {
+    background: var(--paper-dark);
+    color: var(--ink);
+    border-color: var(--ink-light);
+    border-bottom: 2px solid var(--red);
+  }
+
+  .tab-korean {
+    display: block;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 0.2em;
+    margin-top: 3px;
+    font-weight: 300;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  .panel {
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+  .panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FORM SECTIONS */
+  .form-box {
+    background: var(--paper-dark);
+    border: 1px solid var(--stroke);
+    border-left: 3px solid var(--red);
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .form-box::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--paper-dark);
+    padding: 0 10px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+  }
+
+  .form-title {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 24px;
+    letter-spacing: 0.08em;
+  }
+  .form-title span {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--red);
+    font-size: 13px;
+    display: block;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    margin-top: 4px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .field-row.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 500px) {
+    .field-row, .field-row.three { grid-template-columns: 1fr; }
+    .form-box { padding: 24px 20px; }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  input, select {
+    background: var(--paper);
+    border: 1px solid var(--paper-aged);
+    border-bottom: 2px solid var(--ink-light);
+    color: var(--ink);
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-bottom-color: var(--red);
+    background: #fff;
+  }
+
+  input::placeholder { color: var(--paper-aged); }
+
+  /* SELECT arrow */
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    display: block;
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .submit-btn:hover::before { transform: scaleX(1); }
+  .submit-btn span { position: relative; z-index: 1; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* RESULT BOX */
+  .result-box {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px 36px;
+    margin-top: 28px;
+    position: relative;
+    border-left: 4px solid var(--red);
+    display: none;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .result-box.visible { display: block; }
+
+  .result-box::before {
+    content: '운명의 말씀';
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.3em;
+  }
+
+  .result-header {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .result-content {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(245,239,227,0.9);
+    white-space: pre-wrap;
+  }
+
+  .result-content p { margin-bottom: 16px; }
+
+  /* PILLARS DISPLAY */
+  .pillars-display {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .pillar {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 8px;
+    text-align: center;
+  }
+
+  .pillar-label {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+
+  .pillar-char {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 24px;
+    color: var(--paper);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .pillar-element {
+    font-size: 10px;
+    color: rgba(245,239,227,0.5);
+    font-style: italic;
+  }
+
+  /* LOADING */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--gold);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 18px;
+    display: none;
+    letter-spacing: 0.3em;
+  }
+
+  .loading.visible { display: block; }
+
+  .loading-dots::after {
+    content: '...';
+    animation: dots 1.5s infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+
+  /* ERROR */
+  .error-box {
+    background: #2d0a0a;
+    border: 1px solid var(--red);
+    color: #e8b4b4;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 14px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* Today's fortune section */
+  .fortune-intro {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .fortune-intro p {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .today-date {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: var(--ink);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  /* Yin-Yang decoration */
+  .yinyang {
+    display: inline-block;
+    font-size: 32px;
+    margin: 16px 0;
+    opacity: 0.6;
+    animation: slowSpin 20s linear infinite;
+  }
+
+  @keyframes slowSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Compatibility meter */
+  .compat-meter {
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .compat-score {
+    font-family: 'Cinzel', serif;
+    font-size: 48px;
+    color: var(--gold);
+    display: block;
+  }
+
+  .compat-label {
+    font-size: 13px;
+    color: var(--paper-aged);
+    letter-spacing: 0.2em;
+    font-family: 'Cinzel', serif;
+  }
+
+  /* Scroll animation */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border-top: 1px solid var(--stroke);
+    font-style: italic;
+  }
+
+  footer .footer-korean {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 11px;
+    margin-bottom: 6px;
+    color: var(--paper-aged);
+  }
+
+  /* EXPLAINER SECTION */
+  .explainer {
+    border: 1px solid var(--paper-aged);
+    border-left: 3px solid var(--gold);
+    background: linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 100%);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .explainer-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    text-align: left;
+    transition: background 0.2s;
+  }
+
+  .explainer-toggle:hover { background: var(--paper-dark); }
+
+  .explainer-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .explainer-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--paper);
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .explainer-toggle-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .explainer-toggle-title strong {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .explainer-toggle-title small {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    font-weight: 300;
+  }
+
+  .explainer-arrow {
+    font-size: 14px;
+    color: var(--gold);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .explainer.open .explainer-arrow { transform: rotate(180deg); }
+
+  .explainer-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease;
+  }
+
+  .explainer.open .explainer-body { max-height: 900px; }
+
+  .explainer-inner {
+    padding: 0 24px 28px;
+    border-top: 1px solid var(--stroke);
+  }
+
+  .explainer-lead {
+    font-style: italic;
+    color: var(--ink-light);
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 20px 0 24px;
+  }
+
+  .explainer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 500px) {
+    .explainer-grid { grid-template-columns: 1fr; }
+  }
+
+  .explainer-card {
+    background: var(--paper);
+    border: 1px solid var(--stroke);
+    padding: 16px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .explainer-card-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    line-height: 1;
+  }
+
+  .explainer-card-text strong {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .explainer-card-text p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .explainer-vs {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper);
+    border: 1px solid var(--stroke);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .explainer-vs-col { }
+  .explainer-vs-col strong {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .explainer-vs-col p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .explainer-vs-divider {
+    font-size: 18px;
+    color: var(--red);
+    opacity: 0.5;
+    text-align: center;
+  }
+
+  .explainer-note {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.7;
+    padding-top: 16px;
+    border-top: 1px solid var(--stroke);
+    letter-spacing: 0.02em;
+  }
+
+  /* DATE & LOCATION BAR */
+  .date-location-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 22px;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--red);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dlbar-left { display: flex; flex-direction: column; gap: 5px; }
+
+  .dlbar-date-display {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+  }
+
+  .dlbar-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(245,239,227,0.55);
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .dlbar-loc-icon {
+    color: var(--gold);
+    font-size: 11px;
+  }
+
+  .dlbar-loc-btn {
+    background: none;
+    border: none;
+    color: var(--gold);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 2px;
+    line-height: 1;
+    transition: transform 0.3s;
+  }
+  .dlbar-loc-btn:hover { transform: rotate(180deg); }
+
+  .dlbar-change-btn {
+    background: none;
+    border: 1px solid rgba(245,239,227,0.2);
+    color: rgba(245,239,227,0.7);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .dlbar-change-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* DATE PICKER BOX */
+  .date-picker-box {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    background: var(--paper-dark);
+    border: 1px solid var(--stroke);
+    border-top: none;
+    margin-bottom: 0;
+  }
+
+  .date-picker-box.open {
+    max-height: 200px;
+    margin-bottom: 20px;
+  }
+
+  .date-picker-inner {
+    padding: 20px 22px;
+  }
+
+  .date-picker-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .date-picker-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .date-quick-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .quick-date-btn {
+    background: var(--paper);
+    border: 1px solid var(--paper-aged);
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .quick-date-btn:hover, .quick-date-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .date-custom-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .date-custom-wrap label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .date-custom-wrap input[type="date"] {
+    background: var(--paper);
+    border: 1px solid var(--paper-aged);
+    border-bottom: 2px solid var(--ink-light);
+    color: var(--ink);
+    font-family: 'IM Fell English', serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    cursor: pointer;
+  }
+  .date-custom-wrap input[type="date"]:focus {
+    border-bottom-color: var(--red);
+  }
+
+  /* timezone tag in result */
+  .tz-tag {
+    display: inline-block;
+    background: rgba(184,134,11,0.15);
+    border: 1px solid rgba(184,134,11,0.3);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="brush-top"></div>
+<div class="brush-bottom"></div>
+<div class="ink-line-left"></div>
+<div class="ink-line-right"></div>
+
+<header>
+  <div class="hanzi-deco">四柱八字 · Four Pillars of Destiny</div>
+  <div class="logo">
+    SAJU
+    <span class="logo-korean">사주</span>
+  </div>
+  <p class="tagline">Ancient Korean wisdom, revealed in your birth</p>
+  <div class="divider"><span class="divider-symbol">☯</span></div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('saju')">
+    Destiny Reading
+    <span class="tab-korean">사주 풀이</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('compatibility')">
+    Compatibility
+    <span class="tab-korean">궁합</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('today')">
+    Today's Fortune
+    <span class="tab-korean">오늘의 운세</span>
+  </button>
+</div>
+
+<main>
+
+  <!-- SAJU PANEL -->
+  <div class="panel active" id="panel-saju">
+
+    <!-- EXPLAINER BOX -->
+    <div class="explainer" id="explainer-box">
+      <button class="explainer-toggle" onclick="toggleExplainer()">
+        <div class="explainer-toggle-left">
+          <div class="explainer-icon">?</div>
+          <div class="explainer-toggle-title">
+            <strong>What is Saju? New to Korean fortune-telling?</strong>
+            <small>사주란 무엇인가 · Click to learn more</small>
+          </div>
+        </div>
+        <span class="explainer-arrow">▼</span>
+      </button>
+      <div class="explainer-body">
+        <div class="explainer-inner">
+          <p class="explainer-lead">
+            Saju (사주) — meaning <em>"Four Pillars"</em> — is Korea's ancient system of destiny reading.
+            Unlike a psychic or tarot reading, Saju is a structured analytical framework built on thousands
+            of years of Eastern philosophy. Think of it as a cosmic blueprint drawn from the exact moment you were born.
+          </p>
+
+          <div class="explainer-grid">
+            <div class="explainer-card">
+              <div class="explainer-card-icon">🏛️</div>
+              <div class="explainer-card-text">
+                <strong>3,000+ Years Old</strong>
+                <p>Rooted in Chinese cosmology, refined through Korean culture for millennia. Korean royalty consulted Saju before every major decision.</p>
+              </div>
+            </div>
+            <div class="explainer-card">
+              <div class="explainer-card-icon">📐</div>
+              <div class="explainer-card-text">
+                <strong>A System, Not a Guess</strong>
+                <p>No crystal balls. Saju masters analyze your birth data using a precise framework of elements, stems, and branches — more like structured astrology than mysticism.</p>
+              </div>
+            </div>
+            <div class="explainer-card">
+              <div class="explainer-card-icon">🔥</div>
+              <div class="explainer-card-text">
+                <strong>The Five Elements</strong>
+                <p>Wood, Fire, Earth, Metal, and Water govern your personality and fate. Their balance — or imbalance — in your chart reveals your strengths and life patterns.</p>
+              </div>
+            </div>
+            <div class="explainer-card">
+              <div class="explainer-card-icon">🐉</div>
+              <div class="explainer-card-text">
+                <strong>The 12 Animals</strong>
+                <p>Each birth year carries one of 12 zodiac animals (Rat, Ox, Tiger…). Combined with your element, this shapes your temperament, relationships, and destiny arc.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="explainer-vs">
+            <div class="explainer-vs-col">
+              <strong>Western Horoscope</strong>
+              <p>Based on the position of the sun at birth. Changes by month. General personality traits.</p>
+            </div>
+            <div class="explainer-vs-divider">vs</div>
+            <div class="explainer-vs-col">
+              <strong>Korean Saju</strong>
+              <p>Based on year, month, day <em>and hour</em> of birth. Far more specific — two people born on the same day can have very different readings.</p>
+            </div>
+          </div>
+
+          <p class="explainer-note">
+            ✦ &nbsp;Today, over 70% of Koreans consult Saju at least once a year — not as superstition, but as a tool for self-understanding and timing life's big decisions. Even rational, educated Koreans keep going back. Now, for the first time, this tradition is available to you in English.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- END EXPLAINER -->
+
+    <div class="form-box" data-label="BIRTH INFORMATION · 생년월일시">
+      <div class="form-title">
+        Your Four Pillars
+        <span>Enter your birth information for a complete destiny reading</span>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Year of Birth</label>
+          <input type="number" id="saju-year" placeholder="e.g. 1995" min="1900" max="2025">
+        </div>
+        <div class="field">
+          <label>Month</label>
+          <div class="select-wrap">
+            <select id="saju-month">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Day</label>
+          <input type="number" id="saju-day" placeholder="e.g. 15" min="1" max="31">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Hour of Birth (optional)</label>
+          <div class="select-wrap">
+            <select id="saju-hour">
+              <option value="">Unknown / Not Sure</option>
+              <option value="0">0:00 – 1:00 (Rat · 자시)</option>
+              <option value="1">1:00 – 3:00 (Ox · 축시)</option>
+              <option value="3">3:00 – 5:00 (Tiger · 인시)</option>
+              <option value="5">5:00 – 7:00 (Rabbit · 묘시)</option>
+              <option value="7">7:00 – 9:00 (Dragon · 진시)</option>
+              <option value="9">9:00 – 11:00 (Snake · 사시)</option>
+              <option value="11">11:00 – 13:00 (Horse · 오시)</option>
+              <option value="13">13:00 – 15:00 (Goat · 미시)</option>
+              <option value="15">15:00 – 17:00 (Monkey · 신시)</option>
+              <option value="17">17:00 – 19:00 (Rooster · 유시)</option>
+              <option value="19">19:00 – 21:00 (Dog · 술시)</option>
+              <option value="21">21:00 – 23:00 (Pig · 해시)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <div class="select-wrap">
+            <select id="saju-gender">
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Non-binary</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="readSaju()"><span>✦ Reveal My Destiny · 사주 보기 ✦</span></button>
+    </div>
+
+    <div class="loading" id="loading-saju">
+      <div class="yinyang">☯</div>
+      <div>Reading the stars<span class="loading-dots"></span></div>
+    </div>
+    <div class="error-box" id="error-saju"></div>
+    <div class="result-box" id="result-saju">
+      <div class="result-header" id="result-saju-header">Your Four Pillars · 사주팔자</div>
+      <div class="pillars-display" id="pillars-display"></div>
+      <div class="result-content" id="result-saju-content"></div>
+    </div>
+  </div>
+
+  <!-- COMPATIBILITY PANEL -->
+  <div class="panel" id="panel-compatibility">
+    <div class="form-box" data-label="PERSON 1 · 첫번째 사람">
+      <div class="form-title">First Person<span>Your birth information</span></div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Year</label>
+          <input type="number" id="compat-year1" placeholder="e.g. 1995" min="1900" max="2025">
+        </div>
+        <div class="field">
+          <label>Month</label>
+          <div class="select-wrap">
+            <select id="compat-month1">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Day</label>
+          <input type="number" id="compat-day1" placeholder="e.g. 15" min="1" max="31">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Gender</label>
+          <div class="select-wrap">
+            <select id="compat-gender1">
+              <option value="">Select</option>
+              <option>Male</option><option>Female</option><option>Non-binary</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hour (optional)</label>
+          <div class="select-wrap">
+            <select id="compat-hour1">
+              <option value="">Unknown</option>
+              <option value="0">0–1 (Rat)</option><option value="3">3–5 (Tiger)</option>
+              <option value="5">5–7 (Rabbit)</option><option value="7">7–9 (Dragon)</option>
+              <option value="9">9–11 (Snake)</option><option value="11">11–13 (Horse)</option>
+              <option value="13">13–15 (Goat)</option><option value="15">15–17 (Monkey)</option>
+              <option value="17">17–19 (Rooster)</option><option value="19">19–21 (Dog)</option>
+              <option value="21">21–23 (Pig)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; font-size:28px; color:var(--red); opacity:0.5; margin: -8px 0; position:relative; z-index:2;">⬥</div>
+
+    <div class="form-box" data-label="PERSON 2 · 두번째 사람">
+      <div class="form-title">Second Person<span>Their birth information</span></div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Year</label>
+          <input type="number" id="compat-year2" placeholder="e.g. 1993" min="1900" max="2025">
+        </div>
+        <div class="field">
+          <label>Month</label>
+          <div class="select-wrap">
+            <select id="compat-month2">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Day</label>
+          <input type="number" id="compat-day2" placeholder="e.g. 7" min="1" max="31">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Gender</label>
+          <div class="select-wrap">
+            <select id="compat-gender2">
+              <option value="">Select</option>
+              <option>Male</option><option>Female</option><option>Non-binary</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hour (optional)</label>
+          <div class="select-wrap">
+            <select id="compat-hour2">
+              <option value="">Unknown</option>
+              <option value="0">0–1 (Rat)</option><option value="3">3–5 (Tiger)</option>
+              <option value="5">5–7 (Rabbit)</option><option value="7">7–9 (Dragon)</option>
+              <option value="9">9–11 (Snake)</option><option value="11">11–13 (Horse)</option>
+              <option value="13">13–15 (Goat)</option><option value="15">15–17 (Monkey)</option>
+              <option value="17">17–19 (Rooster)</option><option value="19">19–21 (Dog)</option>
+              <option value="21">21–23 (Pig)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="readCompatibility()"><span>✦ Read Our Compatibility · 궁합 보기 ✦</span></button>
+
+    <div class="loading" id="loading-compat">
+      <div class="yinyang">☯</div>
+      <div>Aligning your energies<span class="loading-dots"></span></div>
+    </div>
+    <div class="error-box" id="error-compat"></div>
+    <div class="result-box" id="result-compat">
+      <div class="result-header">Compatibility Reading · 궁합</div>
+      <div class="result-content" id="result-compat-content"></div>
+    </div>
+  </div>
+
+  <!-- TODAY'S FORTUNE PANEL -->
+  <div class="panel" id="panel-today">
+
+    <!-- DATE & LOCATION BAR -->
+    <div class="date-location-bar">
+      <div class="dlbar-left">
+        <div class="dlbar-date-display" id="dlbar-date-display"></div>
+        <div class="dlbar-location" id="dlbar-location">
+          <span class="dlbar-loc-icon">◎</span>
+          <span id="dlbar-loc-text">Detecting location…</span>
+          <button class="dlbar-loc-btn" onclick="detectLocation()">↺</button>
+        </div>
+      </div>
+      <button class="dlbar-change-btn" onclick="toggleDatePicker()">
+        <span id="dlbar-change-label">✎ Change Date</span>
+      </button>
+    </div>
+
+    <!-- DATE PICKER (collapsed by default) -->
+    <div class="date-picker-box" id="date-picker-box">
+      <div class="date-picker-inner">
+        <div class="date-picker-title">Choose a Date for Your Reading</div>
+        <div class="date-picker-row">
+          <div class="date-quick-btns">
+            <button class="quick-date-btn active" onclick="setQuickDate('today', this)">Today</button>
+            <button class="quick-date-btn" onclick="setQuickDate('tomorrow', this)">Tomorrow</button>
+            <button class="quick-date-btn" onclick="setQuickDate('yesterday', this)">Yesterday</button>
+          </div>
+          <div class="date-custom-wrap">
+            <label>Custom Date</label>
+            <input type="date" id="custom-date-input" onchange="setCustomDate(this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-box" data-label="YOUR BIRTH · 생년월일">
+      <div class="form-title">Daily Fortune Reading<span>Your birth date shapes how cosmic energy affects you</span></div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Birth Year</label>
+          <input type="number" id="today-year" placeholder="e.g. 1995" min="1900" max="2025">
+        </div>
+        <div class="field">
+          <label>Birth Month</label>
+          <div class="select-wrap">
+            <select id="today-month">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Birth Day</label>
+          <input type="number" id="today-day" placeholder="e.g. 15" min="1" max="31">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Gender</label>
+          <div class="select-wrap">
+            <select id="today-gender">
+              <option value="">Select</option>
+              <option>Male</option><option>Female</option><option>Non-binary</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Focus Area</label>
+          <div class="select-wrap">
+            <select id="today-focus">
+              <option value="overall">Overall Fortune</option>
+              <option value="love">Love & Relationships</option>
+              <option value="career">Career & Wealth</option>
+              <option value="health">Health & Energy</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="readToday()"><span>✦ Reveal Fortune · 오늘의 운세 ✦</span></button>
+    </div>
+
+    <div class="loading" id="loading-today">
+      <div class="yinyang">☯</div>
+      <div>Consulting the heavens<span class="loading-dots"></span></div>
+    </div>
+    <div class="error-box" id="error-today"></div>
+    <div class="result-box" id="result-today">
+      <div class="result-header" id="result-today-header">Fortune · 운세</div>
+      <div class="result-content" id="result-today-content"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-korean">사주팔자는 변하지 않으나, 마음은 스스로 다스릴 수 있다</div>
+  The destiny is written, but the will is your own
+</footer>
+
+<script>
+// Explainer toggle
+function toggleExplainer() {
+  document.getElementById('explainer-box').classList.toggle('open');
+}
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['saju','compatibility','today'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── DATE & LOCATION STATE ──────────────────────────────────────
+let selectedDate = new Date();
+let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let userLocationName = '';
+
+function formatDateDisplay(date) {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    timeZone: userTimezone
+  });
+}
+
+function updateDateBar() {
+  document.getElementById('dlbar-date-display').textContent = formatDateDisplay(selectedDate);
+}
+
+// Init
+updateDateBar();
+
+// Location detection via IP geolocation (no user permission needed)
+async function detectLocation() {
+  const locText = document.getElementById('dlbar-loc-text');
+  locText.textContent = 'Detecting…';
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    userTimezone = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    userLocationName = `${data.city}, ${data.country_name}`;
+    locText.textContent = userLocationName;
+    // Update date display with correct timezone
+    selectedDate = new Date();
+    updateDateBar();
+  } catch (e) {
+    userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    userLocationName = userTimezone;
+    locText.textContent = userTimezone;
+  }
+}
+
+// Date picker toggle
+function toggleDatePicker() {
+  const box = document.getElementById('date-picker-box');
+  box.classList.toggle('open');
+  const lbl = document.getElementById('dlbar-change-label');
+  lbl.textContent = box.classList.contains('open') ? '✕ Close' : '✎ Change Date';
+}
+
+function setQuickDate(which, btn) {
+  document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custom-date-input').value = '';
+  const d = new Date();
+  if (which === 'tomorrow') d.setDate(d.getDate() + 1);
+  if (which === 'yesterday') d.setDate(d.getDate() - 1);
+  selectedDate = d;
+  updateDateBar();
+}
+
+function setCustomDate(val) {
+  if (!val) return;
+  document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+  const [y, m, d] = val.split('-').map(Number);
+  selectedDate = new Date(y, m - 1, d);
+  updateDateBar();
+}
+
+// Auto-detect on load
+detectLocation();
+
+// Today's date (kept for compat)
+const now = new Date();
+
+// Chinese zodiac helpers
+const zodiacAnimals = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
+const heavenlyStems = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const earthlyBranches = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const elements = ['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
+
+function getZodiac(year) {
+  return zodiacAnimals[(year - 4) % 12];
+}
+
+function getStem(year) {
+  return heavenlyStems[(year - 4) % 10];
+}
+
+function getBranch(year) {
+  return earthlyBranches[(year - 4) % 12];
+}
+
+function getElement(year) {
+  return elements[(year - 4) % 10];
+}
+
+function getPillars(year, monthNum, day) {
+  const yearStem = getStem(year);
+  const yearBranch = getBranch(year);
+  const monthBranch = earthlyBranches[((monthNum + 1) % 12)];
+  const monthStem = heavenlyStems[(monthNum + year * 2) % 10];
+  const dayBranch = earthlyBranches[(day + monthNum + year) % 12];
+  const dayStem = heavenlyStems[(day + year) % 10];
+
+  return [
+    { label: 'Year · 년주', char: yearStem + yearBranch, element: getElement(year) + ' ' + getZodiac(year) },
+    { label: 'Month · 월주', char: monthStem + monthBranch, element: 'Month energy' },
+    { label: 'Day · 일주', char: dayStem + dayBranch, element: 'Day energy' },
+    { label: 'Hour · 시주', char: '?', element: 'Unknown' },
+  ];
+}
+
+function renderPillars(pillars, hourChar) {
+  if (hourChar) pillars[3].char = hourChar;
+  return pillars.map(p => `
+    <div class="pillar">
+      <div class="pillar-label">${p.label}</div>
+      <span class="pillar-char">${p.char}</span>
+      <div class="pillar-element">${p.element}</div>
+    </div>
+  `).join('');
+}
+
+const monthMap = {
+  'January':1,'February':2,'March':3,'April':4,'May':5,'June':6,
+  'July':7,'August':8,'September':9,'October':10,'November':11,'December':12
+};
+
+// Claude API call
+async function callClaude(prompt) {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: `You are a master Korean Saju (Four Pillars of Destiny) reader with decades of experience. 
+You blend traditional Eastern wisdom with accessible modern language for international audiences.
+Your readings are poetic yet insightful, drawing on the five elements (Wood, Fire, Earth, Metal, Water), 
+Yin-Yang balance, and the 12 earthly branches. Be specific, atmospheric, and culturally rich.
+Structure your reading with clear sections. Use occasional Korean terms (with English translations).
+Do NOT be generic — make the reading feel uniquely personal and evocative.
+Keep responses to 3-5 paragraphs.`,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if (!response.ok) throw new Error(`API error: ${response.status}`);
+  const data = await response.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+function showLoading(id, show) {
+  document.getElementById(id).classList.toggle('visible', show);
+}
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+}
+function showResult(id, show) {
+  document.getElementById(id).classList.toggle('visible', show);
+}
+
+async function readSaju() {
+  const year = parseInt(document.getElementById('saju-year').value);
+  const month = document.getElementById('saju-month').value;
+  const day = parseInt(document.getElementById('saju-day').value);
+  const hour = document.getElementById('saju-hour').value;
+  const gender = document.getElementById('saju-gender').value;
+
+  if (!year || !month || !day) return showError('error-saju', 'Please enter your year, month, and day of birth.');
+  showError('error-saju', '');
+  showResult('result-saju', false);
+  showLoading('loading-saju', true);
+
+  const monthNum = monthMap[month];
+  const zodiac = getZodiac(year);
+  const element = getElement(year);
+  const pillars = getPillars(year, monthNum, day);
+
+  document.getElementById('pillars-display').innerHTML = renderPillars(pillars);
+
+  const prompt = `Please give a complete Saju (사주팔자) reading for a ${gender || 'person'} born on ${month} ${day}, ${year}${hour !== '' && hour !== undefined ? `, around ${hour}:00` : ''}.
+
+Their Four Pillars:
+- Year Pillar: ${getElement(year)} ${zodiac} (${getStem(year)}${getBranch(year)})
+- Chinese Zodiac: ${zodiac}
+- Primary Element: ${element}
+
+Please cover:
+1. **Core Nature & Destiny** — their innate character and life path
+2. **Strengths & Challenges** — what the five elements reveal
+3. **Career & Wealth Fortune** — areas where they will flourish
+4. **Love & Relationships** — romantic compatibility and emotional nature
+5. **Life Advice** — wisdom from the saju masters
+
+Write in an evocative, literary style suitable for someone unfamiliar with Korean fortune-telling.`;
+
+  try {
+    const text = await callClaude(prompt);
+    document.getElementById('result-saju-header').textContent = `${zodiac} · ${element} · ${year} · 사주팔자`;
+    document.getElementById('result-saju-content').textContent = text;
+    showResult('result-saju', true);
+  } catch (e) {
+    showError('error-saju', 'The stars are momentarily obscured. Please try again.');
+  } finally {
+    showLoading('loading-saju', false);
+  }
+}
+
+async function readCompatibility() {
+  const y1 = parseInt(document.getElementById('compat-year1').value);
+  const m1 = document.getElementById('compat-month1').value;
+  const d1 = parseInt(document.getElementById('compat-day1').value);
+  const g1 = document.getElementById('compat-gender1').value;
+  const y2 = parseInt(document.getElementById('compat-year2').value);
+  const m2 = document.getElementById('compat-month2').value;
+  const d2 = parseInt(document.getElementById('compat-day2').value);
+  const g2 = document.getElementById('compat-gender2').value;
+
+  if (!y1 || !m1 || !d1 || !y2 || !m2 || !d2) return showError('error-compat', 'Please enter birth information for both people.');
+  showError('error-compat', '');
+  showResult('result-compat', false);
+  showLoading('loading-compat', true);
+
+  const prompt = `Please perform a Korean Saju compatibility reading (궁합, Gung-hap) for these two people:
+
+Person 1: ${g1 || 'Person'}, born ${m1} ${d1}, ${y1} — ${getZodiac(y1)} (${getElement(y1)})
+Person 2: ${g2 || 'Person'}, born ${m2} ${d2}, ${y2} — ${getZodiac(y2)} (${getElement(y2)})
+
+Please analyze:
+1. **Element Harmony** — how their five elements interact (are they complementary or conflicting?)
+2. **Zodiac Compatibility** — how the two animal signs relate
+3. **Emotional Dynamics** — how they understand each other
+4. **Strengths of This Pairing** — what they bring out in each other
+5. **Challenges to Navigate** — areas requiring care and understanding
+6. **Overall Verdict** — a poetic summary of their connection
+
+Be warm, honest, and culturally rich. This is a couple seeking genuine insight.`;
+
+  try {
+    const text = await callClaude(prompt);
+    document.getElementById('result-compat-content').textContent = text;
+    showResult('result-compat', true);
+  } catch (e) {
+    showError('error-compat', 'The stars are momentarily obscured. Please try again.');
+  } finally {
+    showLoading('loading-compat', false);
+  }
+}
+
+async function readToday() {
+  const year = parseInt(document.getElementById('today-year').value);
+  const month = document.getElementById('today-month').value;
+  const day = parseInt(document.getElementById('today-day').value);
+  const gender = document.getElementById('today-gender').value;
+  const focus = document.getElementById('today-focus').value;
+
+  if (!year || !month || !day) return showError('error-today', 'Please enter your birth date.');
+  showError('error-today', '');
+  showResult('result-today', false);
+  showLoading('loading-today', true);
+
+  const readingDateStr = formatDateDisplay(selectedDate);
+  const isToday = selectedDate.toDateString() === new Date().toDateString();
+  const isFuture = selectedDate > new Date();
+  const focusMap = { overall:'all areas of life', love:'love and relationships', career:'career and wealth', health:'health and vitality' };
+  const locationCtx = userLocationName ? `The person is located in ${userLocationName} (timezone: ${userTimezone}).` : `Timezone: ${userTimezone}.`;
+
+  const prompt = `Please give a daily fortune (오늘의 운세) reading for ${isToday ? 'today' : isFuture ? 'a future date' : 'a past date'}: ${readingDateStr}.
+
+The person is a ${gender || 'person'} born on ${month} ${day}, ${year} — ${getZodiac(year)} (${getElement(year)} element).
+${locationCtx}
+They want to focus on: ${focusMap[focus]}.
+
+Reading date's cosmic year energy: ${getStem(selectedDate.getFullYear())}${getBranch(selectedDate.getFullYear())} (${getZodiac(selectedDate.getFullYear())}).
+${isFuture ? 'This is a FUTURE date — frame the reading as prospective guidance and what energies to prepare for.' : ''}
+${!isToday && !isFuture ? 'This is a PAST date — frame as reflective insight, what energies were at play.' : ''}
+
+Please provide:
+1. **Day's Energy** — the cosmic weather for this specific date
+2. **Specific Guidance** — personalized advice for their focus area (${focusMap[focus]})
+3. **Auspicious Hours** — the best times of day for important matters
+4. **Lucky Elements** — colors, directions, or numbers favored
+5. **A Daily Affirmation** — a short meaningful phrase (include the Korean · 한국어)
+
+Be concise, practical, and uplifting while maintaining depth.`;
+
+  try {
+    const text = await callClaude(prompt);
+    const label = isToday ? "Today's Fortune · 오늘의 운세" : isFuture ? "Future Reading · 미래 운세" : "Past Reading · 지난 운세";
+    document.getElementById('result-today-header').textContent = label;
+    // Add timezone tag
+    const tzTag = `<div class="tz-tag">📍 ${userLocationName || userTimezone} · ${readingDateStr}</div>`;
+    document.getElementById('result-today-content').innerHTML = tzTag + '<span id="today-text"></span>';
+    document.getElementById('today-text').textContent = text;
+    showResult('result-today', true);
+  } catch (e) {
+    showError('error-today', 'The stars are momentarily obscured. Please try again.');
+  } finally {
+    showLoading('loading-today', false);
+  }
+}
+</script>
+</body>
+</html>
